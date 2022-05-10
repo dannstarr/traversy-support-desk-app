@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FaUser } from 'react-icons/fa'
+import { useSelector, useDispatch } from 'react-redux'
+import { register, reset } from '../features/auth/authSlice'
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -11,6 +14,24 @@ function Register() {
     })
     // de-structure formData
     const { name, email, password, password2 } = formData
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+    const { user, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth)
+
+    useEffect(() => {
+        if (isError) {
+            toast.error(message);
+            console.log(message);
+        }
+
+        // Redirect when logged in
+        if (isSuccess || user) {
+            navigate('/')
+        }
+        dispatch(reset())
+    }, [isError, isSuccess, user, message, navigate, dispatch])
 
     const onChange = (e) => {
         setFormData((prevState) => ({
@@ -24,6 +45,14 @@ function Register() {
 
         if (password !== password2) {
             toast.error('Passwords do not match')
+        } else {
+            const userData = {
+                name,
+                email,
+                password
+            }
+
+            dispatch(register(userData))
         }
 
     }
@@ -45,7 +74,7 @@ function Register() {
                             name='name'
                             value={name}
                             onChange={onChange}
-                            placeHolder='Enter your name'
+                            placeholder='Enter your name'
                             required
                         />
                     </div>
@@ -56,7 +85,7 @@ function Register() {
                             name='email'
                             value={email}
                             onChange={onChange}
-                            placeHolder='Enter your email'
+                            placeholder='Enter your email'
                             required
                         />
                     </div>
@@ -67,7 +96,7 @@ function Register() {
                             name='password'
                             value={password}
                             onChange={onChange}
-                            placeHolder='Enter password'
+                            placeholder='Enter password'
                             required
                         />
                     </div>
@@ -78,7 +107,7 @@ function Register() {
                             name='password2'
                             value={password2}
                             onChange={onChange}
-                            placeHolder='Confirm password'
+                            placeholder='Confirm password'
                             required
                         />
                     </div>
